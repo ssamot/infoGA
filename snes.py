@@ -2,14 +2,14 @@ __author__ = 'Tom Schaul, tom@idsia.ch, Spyridon Samothrakis ssamot@essex.ac.uk'
 
 ## ssamot hacked ask/tell interface, algorithmic implementation is from Tom Schaul
 
-from scipy import dot, exp, log, sqrt, ones, zeros_like, Inf, argmax
+from numpy import dot, exp, log, sqrt, ones, zeros_like, Inf, argmax
 import numpy as np
 
 
 def computeUtilities(fitnesses):
     L = len(fitnesses)
     ranks = zeros_like(fitnesses)
-    l = zip(fitnesses, range(L))
+    l = list(zip(fitnesses, range(L)))
     l.sort()
     for i, (_, j) in enumerate(l):
         ranks[j] = i
@@ -27,7 +27,7 @@ class SNES():
         self.dim = len(x0)
         self.learningRate =  0.2 * (3 + log(self.dim)) / sqrt(self.dim)
         #print self.learningRate
-        self.learningRate = self.learningRate*learning_rate_mult
+        #self.learningRate = self.learningRate*learning_rate_mult
         #self.learningRate = 0.000001
         self.numEvals = 0
         self.bestFound = None
@@ -51,7 +51,7 @@ class SNES():
             self.bestFitness = max(fitnesses)
             self.bestFound = samples[argmax(fitnesses)]
         self.numEvals += self.batchSize
-        if self.verbose: print "Step", self.numEvals/self.batchSize, ":", max(fitnesses), "best:", self.bestFitness, len(fitnesses)
+        if self.verbose: print ("Step", self.numEvals/self.batchSize, ":", max(fitnesses), "best:", self.bestFitness, len(fitnesses))
 
         # update center and variances
         utilities = computeUtilities(fitnesses)
@@ -65,7 +65,7 @@ if __name__ == "__main__":
 
 
     # 100-dimensional ellipsoid function
-    dim = 30
+    dim = 20
     A = np.array([np.power(1000, 2 * i / (dim - 1.)) for i in range(dim)])
     def elli(x):
         return -dot(A * x, x)
