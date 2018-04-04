@@ -2,33 +2,44 @@ import keras.backend as K
 import numpy as np
 
 
-def set_trainable_weight(model, weights):
-    """Sets the weights of the model.
+class NNWeightHelper:
+    def __init__(self, model):
+        self.model = model
+        self.init_weights = K.get_session().run(self.model.trainable_weights)
 
-    # Arguments
-        model: a keras neural network model
-        weights: A list of Numpy arrays with shapes and types matching
-            the output of `model.trainable_weights`.
-    """
-    tuples = []
-    for layer in model.layers:
-        num_param = len(layer.trainable_weights)
-        layer_weights = weights[:num_param]
-        for sw, w in zip(layer.trainable_weights, layer_weights):
-            tuples.append((sw, w))
-        weights = weights[num_param:]
-    K.batch_set_value(tuples)
 
-def get_trainable_weights(model):
-    """Gets the weights of the model.
+    def _set_trainable_weight(self, model, weights):
+        """Sets the weights of the model.
 
-    # Arguments
-        model: a keras neural network model
+        # Arguments
+            model: a keras neural network model
+            weights: A list of Numpy arrays with shapes and types matching
+                the output of `model.trainable_weights`.
+        """
+        tuples = []
+        for layer in model.layers:
+            num_param = len(layer.trainable_weights)
+            layer_weights = weights[:num_param]
+            for sw, w in zip(layer.trainable_weights, layer_weights):
+                tuples.append((sw, w))
+            weights = weights[num_param:]
+        K.batch_set_value(tuples)
 
-    # Returns
-        a Numpy array of weights
-    """
-    W_list = K.get_session().run(model.trainable_weights)
-    W_flattened_list = [k.flatten() for k in W_list]
-    W = np.concatenate(W_flattened_list)
-    return W
+
+    def set_weights(self, weights):
+        new_weights = []
+        total_consumed = 0
+        for w in self.init_weights:
+            layer_shape, layer_size = w.shape, w.size
+            chunk = weights[total_consumed:total_consumed + layer_size]
+            total_consumed += layer_size
+            new_weights.append(np.array(chunk.reshape(layer_shape)))
+
+        self._set_trainable_weight(self.model, new_weights)
+
+
+    def get_weights(self):
+        W_list = K.get_session().run(self.model.trainable_weights)
+        W_flattened_list = [k.flatten() for k in W_list]
+        W = np.concatenate(W_flattened_list)
+        return W
