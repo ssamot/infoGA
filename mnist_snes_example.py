@@ -24,7 +24,7 @@ SAMPLE_SIZE = 1024
 # how many different sets of weights ask() should return for evaluation
 POPULATION_SIZE = 10
 # how many times we will loop over ask()/tell()
-GENERATIONS = 300
+GENERATIONS = 30
 
 def train_classifier(model, X, y):
     X_features = model.predict(X)
@@ -74,7 +74,7 @@ model.add(Conv2D(32, kernel_size=(3, 3),
 # model.add(Conv2D(64, (3, 3), activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(Flatten())
-model.add(Dense(128, activation='relu'))
+model.add(Dense(6, activation='relu'))
 
 # this is irrelevant for what we want to achieve
 model.compile(loss="mse", optimizer="adam")
